@@ -2,16 +2,10 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub fn create(name: &str, path: &str) {
-    let filename = path.to_string()
-        + format!(
-            "{:?}",
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-        )
-        .as_str();
+pub fn consume() {}
+
+pub fn create(name: &str, path: &str, time: u64) {
+    let filename = path.to_string() + format!("{:?}", time).as_str();
 
     let mut file = OpenOptions::new()
         .write(true)
@@ -25,6 +19,8 @@ pub fn create(name: &str, path: &str) {
 }
 
 pub fn list(path: &str) {
+    let mut items: Vec<String> = Vec::new();
+
     for file in std::fs::read_dir(path).unwrap() {
         let filename = file.unwrap().file_name().to_str().unwrap().to_string();
 
@@ -35,8 +31,24 @@ pub fn list(path: &str) {
 
         for line in contents.split("\n") {
             if line != "" {
-                println!("{} {}", filename, line);
+                if filename.parse::<u64>().unwrap()
+                    > SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs()
+                {
+                    items.push(format!("{} {}", filename, line));
+                } else {
+                    items.push(format!("{} {} (overdue)", filename, line));
+                }
             }
         }
     }
+
+    items.sort();
+    for item in items {
+        println!("{}", item);
+    }
 }
+
+pub fn monitor() {}
