@@ -1,6 +1,45 @@
+use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::{thread, time};
+
+pub struct ListItem {
+    time: u64,
+    label: String,
+    flag: bool,
+}
+
+impl ListItem {
+    pub fn new(time: u64, label: String) -> Self {
+        let mut n = Self {
+            time,
+            label,
+            flag: false,
+        };
+
+        n.flag = n.is_overdue();
+
+        n
+    }
+    fn is_overdue(&self) -> bool {
+        self.time
+            > SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+    }
+}
+
+impl fmt::Display for ListItem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.is_overdue() {
+            write!(f, "{} {}", self.time, self.label)
+        } else {
+            write!(f, "{} {} (overdue)", self.time, self.label)
+        }
+    }
+}
 
 pub fn consume() {}
 
