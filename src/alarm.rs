@@ -81,4 +81,22 @@ pub fn list(path: &str) -> Vec<ListItem> {
     items
 }
 
-pub fn monitor() {}
+pub fn monitor(path: &str) {
+    let mut items = list(path);
+
+    for item in items.iter_mut() {
+        if item.flag == false {
+            println!("{}", item);
+        }
+    }
+
+    loop {
+        for mut item in items.iter_mut() {
+            if item.flag != item.is_overdue() {
+                item.flag = item.is_overdue();
+                println!("{}", item);
+            }
+        }
+        thread::sleep(time::Duration::from_secs(1));
+    }
+}
