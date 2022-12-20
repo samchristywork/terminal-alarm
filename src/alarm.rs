@@ -57,8 +57,8 @@ pub fn create(name: &str, path: &str, time: u64) {
     file.write("\n".as_bytes()).unwrap();
 }
 
-pub fn list(path: &str) {
-    let mut items: Vec<String> = Vec::new();
+pub fn list(path: &str) -> Vec<ListItem> {
+    let mut items = Vec::new();
 
     for file in std::fs::read_dir(path).unwrap() {
         let filename = file.unwrap().file_name().to_str().unwrap().to_string();
@@ -70,24 +70,15 @@ pub fn list(path: &str) {
 
         for line in contents.split("\n") {
             if line != "" {
-                if filename.parse::<u64>().unwrap()
-                    > SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .unwrap()
-                        .as_secs()
-                {
-                    items.push(format!("{} {}", filename, line));
-                } else {
-                    items.push(format!("{} {} (overdue)", filename, line));
-                }
+                let time = filename.parse::<u64>().unwrap();
+                items.push(ListItem::new(time, line.to_string()));
             }
         }
     }
 
-    items.sort();
-    for item in items {
-        println!("{}", item);
-    }
+    items.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
+
+    items
 }
 
 pub fn monitor() {}
