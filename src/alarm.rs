@@ -1,6 +1,7 @@
 use soloud::*;
 use std::fmt;
 use std::fs::{File, OpenOptions};
+use std::io;
 use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{thread, time};
@@ -101,8 +102,23 @@ pub fn monitor(path: &str) {
                 wav.load(&std::path::Path::new("./triangle.wav")).unwrap();
 
                 sl.play(&wav);
-                while sl.voice_count() > 0 {
-                    std::thread::sleep(std::time::Duration::from_millis(10));
+
+                loop {
+                    println!("Dismiss (y/n)");
+
+                    let mut answer = String::new();
+                    io::stdin()
+                        .read_line(&mut answer)
+                        .expect("Failed to read input");
+
+                    match answer.strip_suffix("\n").unwrap() {
+                        "y" => {
+                            println!("yes");
+                            break;
+                        }
+                        "n" => println!("no"),
+                        _ => println!("error"),
+                    }
                 }
             }
         }
