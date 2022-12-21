@@ -1,3 +1,4 @@
+use soloud::*;
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
@@ -85,9 +86,7 @@ pub fn monitor(path: &str) {
     let mut items = list(path);
 
     for item in items.iter_mut() {
-        if item.flag == false {
-            println!("{}", item);
-        }
+        println!("{}", item);
     }
 
     loop {
@@ -95,6 +94,16 @@ pub fn monitor(path: &str) {
             if item.flag != item.is_overdue() {
                 item.flag = item.is_overdue();
                 println!("{}", item);
+                let sl = Soloud::default().unwrap();
+
+                let mut wav = audio::Wav::default();
+
+                wav.load(&std::path::Path::new("./triangle.wav")).unwrap();
+
+                sl.play(&wav);
+                while sl.voice_count() > 0 {
+                    std::thread::sleep(std::time::Duration::from_millis(10));
+                }
             }
         }
         thread::sleep(time::Duration::from_secs(1));
